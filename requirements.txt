@@ -1,5 +1,9 @@
-fastapi
-uvicorn
-scikit-learn
+gunicorn
+scikit-learn==1.3.2
 xgboost
 matplotlib
+Flask==3.0.3
+flask-cors==4.0.1
+numpy==1.26.4
+pandas==2.2.1
+opencv-python==4.10.0.84

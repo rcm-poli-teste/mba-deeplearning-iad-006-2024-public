@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predição de Imagem</title>
+</head>
+<body>
+    <h2>Trabalho 1 - Aprendizado de Máquina 2</h2>
+    <h2>Predição de Imagem</h2>
+    <h3>Aluno: Rafael Costa Mendes</h3>
+    <input type="text" id="host" placeholder="Digite o host" value="0.0.0.0">
+    <input type="text" id="port" placeholder="Digite a porta" value="8000">
+    <select id="imagemSelecionada">
+        <option value="numeroZero.jpg">numeroZero.jpg</option>
+        <option value="numeroUm.jpg">numeroUm.jpg</option>
+        <option value="numeroDois.jpg">numeroDois.jpg</option>
+        <option value="numeroTres.jpg">numeroTres.jpg</option>
+        <option value="numeroQuatro.jpg">numeroQuatro.jpg</option>
+        <option value="numeroCinco.jpg">numeroCinco.jpg</option>
+        <option value="numeroSeis.jpg">numeroSeis.jpg</option>
+        <option value="numeroSete.jpg">numeroSete.jpg</option>
+        <option value="numeroOito.jpg">numeroOito.jpg</option>
+        <option value="numeroNove.jpg">numeroNove.jpg</option>
+    </select>
+    <button onclick="chamaPredicao()">Predizer</button>
+    <table id="imagemVisualizacao">
+        <tr>
+            <td>Imagem Selecionada:</td>
+            <td id="imagemPreview"></td>
+        </tr>
+    </table>
+    <table id="resultado"></table>    
+
+    <script>
+        function chamaPredicao() {
+            const host = document.getElementById("host").value;
+            const port = document.getElementById("port").value;
+            const imagemSelecionada = document.getElementById("imagemSelecionada").value;
+
+            const xhr = new XMLHttpRequest();
+            const url = `http://${host}:${port}/predictV2`;
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+
+                    const table = document.getElementById("resultado");
+                    table.innerHTML = "";
+
+                    const row = table.insertRow(0);
+                    const cell1 = row.insertCell(0);
+                    const cell2 = row.insertCell(1);
+
+                    cell1.textContent = "Número Previsto: " + response.numeroPrevisto;
+                } else {
+                    console.error("Erro na requisição:", xhr.statusText);
+                }
+            };
+            xhr.onerror = function () {
+                console.error("Erro de conexão:", xhr.statusText);
+            };
+
+            // Leitura da imagem local
+            const imagemLocal = new Image();
+            imagemLocal.src = `${imagemSelecionada}`;
+
+            // Criação do FormData
+            const formData = new FormData();
+            //formData.append('ImageFileName', imagemSelecionada);
+
+            // Conversão da imagem para base64
+            imagemLocal.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = imagemLocal.width;
+                canvas.height = imagemLocal.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(imagemLocal, 0, 0);
+                const dataURL = canvas.toDataURL('image/jpg');
+                const base64Data = dataURL.split(',')[1];
+
+                formData.append('imagemOriginal', base64Data);
+
+                xhr.send(JSON.stringify({ imagemNomeArquivo: imagemSelecionada, imagemOriginal: base64Data }));
+            };
+        }
+
+        // Mostrar a imagem selecionada
+        function previewImagemSelecionada() {
+            const imagemSelecionada = document.getElementById("imagemSelecionada").value;
+            const imagemPreview = document.getElementById("imagemPreview");
+            imagemPreview.innerHTML = "";
+
+            const img = document.createElement("img");
+            img.src = `${imagemSelecionada}`;
+            imagemPreview.appendChild(img);
+            //imagemPreview.textContent = imagemSelecionada;
+        }
+
+        document.getElementById("imagemSelecionada").addEventListener("change", previewImagemSelecionada);
+
+        // Mostrar a imagem padrão inicialmente
+        previewImagemSelecionada();
+    </script>
+</body>
+</html>
